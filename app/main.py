@@ -19,7 +19,7 @@ def webhook_save():
         req_data = request.get_json()
         # print(req_data)
         json_str = json.dumps(req_data)
-        print(json_str)
+        # print(json_str)
 
         now = datetime.datetime.now()
         now_datetime = now.strftime('%Y-%m-%d %H:%M:%S')
