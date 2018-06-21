@@ -1,71 +1,55 @@
-from flask import Flask, request, abort, redirect, url_for, jsonify, render_template
+from flask import Flask, request, abort, jsonify
 import json
-import redis
 import datetime, time
-import ast
-from rejson import Client, Path
+import pymysql.cursors
 
-REDIS_SERVER = 'redis-master'
-REDIS_PWD = ''
-TTL = 31104000
+# MARIA_SERVER = '169.56.100.62'
+# MARIA_PORT = 30000
+MARIA_SERVER = 'webhook-mariadb'
+MARIA_PORT = 3306
+MARIA_DB = 'alertmanager'
+MARIA_USER = 'root'
+MARIA_PWD = 'admin'
 
 app = Flask(__name__)
-
-@app.route('/')
-def hello_world():
-    return 'Read Usage API Docs'
-
-@app.route('/hello/')
-@app.route('/hello/<name>')
-def hello(name=None):
-    return render_template('hello.html', name=name)
 
 @app.route('/webhook', methods=['POST'])
 def webhook_save():
     if request.method == 'POST':
-        
-        timestamp_human = datetime.datetime.now()
-        timestamp = int(time.time())
-        nowDatetime = timestamp_human.strftime('%Y-%m-%d(%H:%M:%S)')
         req_data = request.get_json()
-        alertname = req_data['commonLabels']['alertname']
-        severity = ''
-        receiver = req_data['receiver']
-        key_name = str(timestamp)+"_"+alertname+"_"+receiver    
-        try:
-            #conn = redis.Redis(host=REDIS_SERVER, port=6379, db=0, password=REDIS_PWD)
-            conn = Client(host=REDIS_SERVER, port=6379, db=0, password=REDIS_PWD)
-            conn.ping()
-            print 'Redis connected %s' % (REDIS_SERVER)
-        except Exception as e:
-            print 'Error:', e
-            exit('Failed to connecting')   
+        # print(req_data)
+        json_str = json.dumps(req_data)
+        print(json_str)
 
-        conn = Client(host=REDIS_SERVER, port=6379)
-        conn.jsonset(key_name, Path.rootPath(), req_data)
-        data = json.dumps(conn.jsonget(key_name))
-        print data
-        # Redis : SCAN 0 match 1527911[1-9][1-9]*
-        
+        now = datetime.datetime.now()
+        now_datetime = now.strftime('%Y-%m-%d %H:%M:%S')
+        # print(now_datetime)
+
+        conn = pymysql.connect(host=MARIA_SERVER,
+                               port=MARIA_PORT,
+                               user=MARIA_USER,
+                               password=MARIA_PWD,
+                               db=MARIA_DB,
+                               charset='utf8')
+        try:
+            with conn.cursor() as cursor:
+                sql = 'INSERT INTO history (alert, datetime) VALUES (%s, %s)'
+                cursor.execute(sql, (json_str, now_datetime))
+
+                conn.commit()
+
+            # with conn.cursor() as cursor:
+            #     sql = 'SELECT * FROM history'
+            #     cursor.execute(sql)
+            #     result = cursor.fetchall()
+            #     print(result)
+        finally:
+            conn.close()
+
     else:
         abort(400)
 
-    if not conn.exists(key_name):
-        print "Error: %s is doesn't exist" % (key_name)
-    
-
-    return jsonify({'status':'success'}), 200
-
-@app.route('/api/v1/view/')
-def page_not_found():
-    return redirect(url_for('hello'))
-@app.route('/api/v1/view/<timestamp>/<alert_type>/<reciever>')
-def webhook_view(timestamp=None, alert_type=None, reciever=None, key_name=None):
-    if request.method == 'GET':
-        conn = Client(host=REDIS_SERVER, port=6379, db=0, password=REDIS_PWD)
-        params = timestamp+'_'+alert_type+'_'+reciever
-        data = json.dumps(conn.jsonget(params))
-        return render_template('info.html', data=data)
+    return jsonify({'status': 'success'}), 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',debug=True)
+    app.run(host='0.0.0.0', debug=True)
