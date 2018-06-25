@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: webhook
+  name: webhook-alertmanager-store
+  namespace: zcp-system
+spec:
+  selector:
+    matchLabels:
+      app: webhook-alertmanager-store
+  template:
+    metadata:
+      labels:
+        app: webhook-alertmanager-store
+    spec:
+      containers:
+      - image: cocopop1106/zcp-alertmanager-store:0.1
+        imagePullPolicy: Always
+        name: webhook-alertmanager-store
+        ports:
+        - containerPort: 5000
+          protocol: TCP
