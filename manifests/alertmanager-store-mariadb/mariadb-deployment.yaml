@@ -1,0 +1,58 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: alertmanager-store-mariadb
+  namespace: zcp-system
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: alertmanager-store-mariadb 
+    spec:
+      containers:
+        - name: mariadb
+          image: mariadb:10.3.7 # Version of MariaDB Docker Image
+          ports:
+          - containerPort: 3306
+            name: mariadb
+            protocol: TCP
+          env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: alertmanager-store-mariadb 
+                key: password
+          livenessProbe:
+            exec:
+              command:
+              - mysqladmin
+              - ping
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command: ["bash", "-c", "mysql -uroot -p\"${MYSQL_ROOT_PASSWORD}\" -e 'show databases;'"]
+            initialDelaySeconds: 20
+            timeoutSeconds: 5
+          volumeMounts:
+          - name: tz-config
+            mountPath: /etc/localtime
+          - name: config
+            mountPath: /etc/mysql/conf.d
+          - name: alertmanager-store-volume
+            mountPath: /var/lib/mysql
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Seoul
+      - name: config
+        configMap:
+          name: alertmanager-store-mariadb 
+          items:
+            - path: "mariadb.cnf"
+              key: mariadb.cnf
+      - name: alertmanager-store-volume
+        persistentVolumeClaim:
+          claimName: alertmanager-store-data
+
