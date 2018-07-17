@@ -5,7 +5,8 @@ import pymysql.cursors
 
 # MARIA_SERVER = '169.56.100.62'
 # MARIA_PORT = 30000
-MARIA_SERVER = 'webhook-mariadb'
+# MARIA_SERVER = 'webhook-mariadb'
+MARIA_SERVER = 'alertmanager-store-mariadb'
 MARIA_PORT = 3306
 MARIA_DB = 'alertmanager'
 MARIA_USER = 'root'
