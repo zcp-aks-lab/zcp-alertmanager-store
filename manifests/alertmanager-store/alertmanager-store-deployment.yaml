@@ -16,8 +16,14 @@ spec:
     spec:
       containers:
       - image: cocopop1106/zcp-alertmanager-store:0.1
-        imagePullPolicy: Always
         name: webhook-alertmanager-store
         ports:
         - containerPort: 5000
           protocol: TCP
+        volumeMounts:
+          - name: tz-config
+            mountPath: /etc/localtime
+    volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Seoul
