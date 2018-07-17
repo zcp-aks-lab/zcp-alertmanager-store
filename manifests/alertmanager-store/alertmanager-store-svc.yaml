@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: webhook-alertmanager-store-svc
+  name: alertmanager-store-svc
   namespace: zcp-system 
 spec:
   ports:
@@ -9,6 +9,6 @@ spec:
     protocol: TCP
     targetPort: 5000
   selector:
-    app: webhook-alertmanager-store
+    app: alertmanager-store
   type: ClusterIP 
 

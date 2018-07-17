@@ -2,28 +2,28 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    app: webhook
-  name: webhook-alertmanager-store
+    app: alertmanager-store
+  name: alertmanager-store 
   namespace: zcp-system
 spec:
   selector:
     matchLabels:
-      app: webhook-alertmanager-store
+      app: alertmanager-store 
   template:
     metadata:
       labels:
-        app: webhook-alertmanager-store
+        app: alertmanager-store 
     spec:
       containers:
       - image: cocopop1106/zcp-alertmanager-store:0.1
-        name: webhook-alertmanager-store
+        name: alertmanager-store 
         ports:
         - containerPort: 5000
           protocol: TCP
         volumeMounts:
           - name: tz-config
             mountPath: /etc/localtime
-    volumes:
+      volumes:
       - name: tz-config
         hostPath:
           path: /usr/share/zoneinfo/Asia/Seoul
