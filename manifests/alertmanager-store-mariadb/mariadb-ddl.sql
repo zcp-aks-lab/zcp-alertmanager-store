@@ -1,3 +1,5 @@
+CREATE DATABASE alertmanager;
+
 CREATE
 	TABLE
 		history(
