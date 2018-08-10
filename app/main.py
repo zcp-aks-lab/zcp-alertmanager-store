@@ -5,6 +5,9 @@ from flask import Flask, request, abort, jsonify
 import json
 import datetime
 import pymysql.cursors
+import logging
+
+MARIA_DB_NAME = 'alertmanager'
 
 # Dev
 # MARIA_SERVER = '127.0.0.1'
@@ -16,14 +19,15 @@ import pymysql.cursors
 # TODO : Extract to configmap or argument
 MARIA_SERVER = 'zcp-alertmanager-store-mariadb'
 MARIA_PORT = 3306
-MARIA_DB_NAME = 'alertmanager'
 MARIA_USER = 'root'
 MARIA_PWD = 'admin'
 
-DEBUG_MODE = True
+
 
 app = Flask(__name__)
 
+DEBUG_MODE = True
+logging.basicConfig(level=logging.DEBUG)
 
 def _get_connection(db=None):
     conn = pymysql.connect(host=MARIA_SERVER,
@@ -64,28 +68,34 @@ DO
 
 _SQL_INSERT_HISTORY = "INSERT INTO history (alert, datetime) VALUES (%s, %s)"
 
+_log = app.logger.info
 
 @app.before_first_request
 def _init_db():
-    print '# Check db scheme...'
+    app.logger.info('# Check database scheme...')
     conn = _get_connection()
     try:
         with conn.cursor() as cursor:
             # Create DB
+            _log(' -> Check database : %s' % MARIA_DB_NAME)
             cursor.execute(_SQL_CREATE_DB)
+
             # Create table and event
+            _log(' -> Check table and event')
             cursor.execute('USE %s' % MARIA_DB_NAME)
             cursor.execute(_SQL_CREATE_TABLE)
             for line in _SQL_SET_EVENT_SCHEDULER.splitlines():
                 cursor.execute(line)
             cursor.execute(_SQL_CREATE_TABLE)
         conn.commit()
+        _log('... OK !')
     finally:
         conn.close()
 
 
 @app.route('/webhook', methods=['POST'])
 def webhook_save():
+    _log('Processing data!')
     if request.method == 'POST':
         req_data = request.get_json()
 
