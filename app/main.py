@@ -11,11 +11,13 @@ import pymysql.cursors
 
 # Production
 # TODO : Extract to configmap or argument
-MARIA_SERVER = 'alertmanager-store-mariadb'
+MARIA_SERVER = 'zcp-alertmanager-store-mariadb'
 MARIA_PORT = 3306
 MARIA_DB_NAME = 'alertmanager'
 MARIA_USER = 'root'
 MARIA_PWD = 'admin'
+
+DEBUG_MODE = True
 
 app = Flask(__name__)
 
@@ -36,11 +38,13 @@ DB Scheme infomation
 '''
 
 _SQL_CREATE_DB = 'CREATE DATABASE IF NOT EXISTS %s' % MARIA_DB_NAME
+
 _SQL_CREATE_TABLE = '''CREATE TABLE IF NOT EXISTS history(
     seq INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     alert JSON,
     datetime VARCHAR(30)
 )'''
+
 _SQL_SET_EVENT_SCHEDULER = '''SET GLOBAL event_scheduler = ON;
 SET @@global.event_scheduler = ON;
 SET GLOBAL event_scheduler = 1;
@@ -106,4 +110,4 @@ def webhook_save():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', debug=DEBUG_MODE)
