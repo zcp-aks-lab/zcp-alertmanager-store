@@ -2,21 +2,40 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    app: alertmanager-store
-  name: alertmanager-store 
+    app: zcp-alertmanager-store
+  name: zcp-alertmanager-store
   namespace: zcp-system
 spec:
   selector:
     matchLabels:
-      app: alertmanager-store 
+      app: zcp-alertmanager-store
   template:
     metadata:
       labels:
-        app: alertmanager-store 
+        app: zcp-alertmanager-store
     spec:
+      tolerations:
+      - key: "management"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - "amd64"
+              - key: role
+                operator: In
+                values:
+                - "management"
       containers:
-      - image: cocopop1106/zcp-alertmanager-store:0.1
-        name: alertmanager-store 
+      - image: registry.au-syd.bluemix.net/cloudzcp/zcp-alertmanager-store:0.9.3
+        name: zcp-alertmanager-store
+        imagePullPolicy: Always
         ports:
         - containerPort: 5000
           protocol: TCP

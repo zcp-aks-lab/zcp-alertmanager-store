@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: alertmanager-store-svc
+  name: zcp-alertmanager-store-svc
   namespace: zcp-system 
 spec:
   ports:
@@ -9,6 +9,6 @@ spec:
     protocol: TCP
     targetPort: 5000
   selector:
-    app: alertmanager-store
+    app: zcp-alertmanager-store
   type: ClusterIP 
 

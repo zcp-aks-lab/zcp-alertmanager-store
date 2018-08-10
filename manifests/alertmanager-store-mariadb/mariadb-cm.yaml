@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: alertmanager-store-mariadb 
+  name: zcp-alertmanager-store-mariadb
   namespace: zcp-system
 data:
   mariadb.cnf: |
