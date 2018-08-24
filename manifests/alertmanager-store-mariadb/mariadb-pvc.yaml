@@ -4,7 +4,7 @@ metadata:
   name: zcp-alertmanager-store-data
   namespace: zcp-system
   annotations:
-    volume.beta.kubernetes.io/storage-class: "ibmc-block-silver"
+    volume.beta.kubernetes.io/storage-class: "ibmc-block-retain-silver"
   labels:
     billingType: "hourly"
 spec:
