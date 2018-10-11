@@ -33,7 +33,7 @@ spec:
                 values:
                 - "management"
       containers:
-      - image: registry.au-syd.bluemix.net/cloudzcp/zcp-alertmanager-store:0.9.3
+      - image: registry.au-syd.bluemix.net/cloudzcp/zcp-alertmanager-store:1.0.0
         name: zcp-alertmanager-store
         imagePullPolicy: Always
         ports:
