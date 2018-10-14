@@ -15,8 +15,8 @@ zcp-alertmanager-store와 mariadb를 설치해야 하는데 순서는 상관 없
 
 ```
 $ git clone https://github.com/cnpst/zcp-alertmanager-store.git
-# Checkout 0.9.3 
-$ git checkout 0.9.3
+# Checkout 1.0.0 
+$ git checkout 1.0.0
  
  
 # Deploying zcp alertmanager store
