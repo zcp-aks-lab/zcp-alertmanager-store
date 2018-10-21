@@ -60,6 +60,13 @@ spec:
             mountPath: /etc/mysql/conf.d
           - name: zcp-alertmanager-store-volume
             mountPath: /var/lib/mysql
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 800m
+              memory: 1Gi
       volumes:
       - name: tz-config
         hostPath:
