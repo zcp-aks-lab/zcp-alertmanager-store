@@ -26,7 +26,7 @@ MARIA_PWD = 'admin'
 
 app = Flask(__name__)
 
-DEBUG_MODE = True
+DEBUG_MODE = False #True
 logging.basicConfig(level=logging.DEBUG)
 
 def _get_connection(db=None):
