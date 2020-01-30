@@ -1,0 +1,82 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: zcp-alertmanager-store-mariadb
+  namespace: zcp-system
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: zcp-alertmanager-store-mariadb
+    spec:
+      tolerations:
+      - key: "management"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - "amd64"
+              - key: role
+                operator: In
+                values:
+                - "management"
+      containers:
+        - name: mariadb
+          image: registry.au-syd.bluemix.net/cloudzcp/mariadb:10.3.7 # Version of MariaDB Docker Image
+          ports:
+          - containerPort: 3306
+            name: mariadb
+            protocol: TCP
+          env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: zcp-alertmanager-store-mariadb
+                key: password
+          livenessProbe:
+            exec:
+              command:
+              - mysqladmin
+              - ping
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command: ["bash", "-c", "mysql -uroot -p\"${MYSQL_ROOT_PASSWORD}\" -e 'show databases;'"]
+            initialDelaySeconds: 20
+            timeoutSeconds: 5
+          volumeMounts:
+          - name: tz-config
+            mountPath: /etc/localtime
+          - name: config
+            mountPath: /etc/mysql/conf.d
+          - name: zcp-alertmanager-store-volume
+            mountPath: /var/lib/mysql
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 800m
+              memory: 1Gi
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Seoul
+      - name: config
+        configMap:
+          name: zcp-alertmanager-store-mariadb
+          items:
+            - path: "mariadb.cnf"
+              key: mariadb.cnf
+      - name: zcp-alertmanager-store-volume
+        persistentVolumeClaim:
+          claimName: zcp-alertmanager-store-data

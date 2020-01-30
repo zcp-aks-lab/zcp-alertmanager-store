@@ -26,6 +26,8 @@ $ kubectl apply -n zcp-system -f ./ --record
  
 # Deploying mariadb
 $ cd ../alertmanager-store-mariadb/
+# AKS 인 경우
+$ cd ../alertmanager-store-mariadb-aks/
 $ kubectl apply -n zcp-system -f ./ --record
 
 ```
